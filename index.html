@@ -78,6 +78,30 @@ input:focus,select:focus{outline:none;border-color:var(--ink)}
 #qr .url{font-size:13px;word-break:break-all;color:var(--mute);text-align:center;user-select:text;-webkit user-select:text}
 .banner{background:#fff3cd;color:#6b4e00;padding:10px 16px;font-size:14px;text-align:center}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .banner{background:#4a3a0a;color:#ffe59a}}
+.help{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;z-index:50}
+.help.on{display:flex}
+.help .box{background:var(--card);color:var(--ink);width:100%;max-width:640px;max-height:88vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px 20px calc(var(--sab) + 20px);user-select:text;-webkit-user-select:text}
+@media (min-width:700px){.help{align-items:center}.help .box{border-radius:22px}}
+.help h2{margin:0 0 4px;font-size:22px}
+.help h3{margin:16px 0 6px;font-size:17px}
+.help p,.help li{font-size:16px;line-height:1.5;margin:0 0 8px}
+.help ol,.help ul{padding-left:22px;margin:0 0 8px}
+.help .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 14px}
+.help .tabs button{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:999px;padding:8px 12px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.help .tabs button.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.help .close{width:100%;margin-top:14px;border:0;border-radius:14px;padding:14px;font:inherit;font-weight:800;font-size:17px;background:var(--ink);color:var(--bg);cursor:pointer}
+.qbtn{width:38px;height:38px;border-radius:50%!important;padding:0!important;font-size:20px!important;display:grid;place-items:center}
+.item{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+.item .hd{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.item .hd b{font-size:22px}
+.item .sec{font-size:15px;color:var(--mute)}
+.item .st{font-size:15px;margin:6px 0 10px;display:flex;gap:14px;flex-wrap:wrap}
+.item .st span b{font-size:18px}
+.item .acts{display:flex;gap:8px}
+.item .acts button{flex:1;border:0;border-radius:12px;padding:12px;font:inherit;font-weight:800;font-size:17px;color:#fff;cursor:pointer}
+.item .acts button.ghost{background:var(--bg);color:var(--ink);border:2px solid var(--line)}
+.item .acts button:disabled{opacity:.35}
+.item.alert{animation:flash .7s ease-out}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -102,13 +126,14 @@ input:focus,select:focus{outline:none;border-color:var(--ink)}
     <div><div class="lbl">PIN do seu papel</div><input id="pin" type="tel" inputmode="numeric" maxlength="6" placeholder="••••"></div>
     <div class="msg" id="setupMsg"></div>
     <button class="btn" id="btnEntrar" style="background:var(--ink);color:var(--bg)">Entrar</button>
+    <button class="btn sec" data-help="fluxo">? Como funciona o processo</button>
     <div class="hint">Os PINs e o tamanho do lote são definidos pela coordenação.</div>
   </div>
 </section>
 
 <!-- PRESIDENTE -->
 <section id="presidente" class="screen">
-  <div class="top" id="topP"><span>Mesa <span id="pMesa"></span></span><small id="pSetor"></small><span class="sp"></span><span class="dot" data-conn></span><button data-sair>Sair</button></div>
+  <div class="top" id="topP"><span>Mesa <span id="pMesa"></span></span><small id="pSetor"></small><span class="sp"></span><span class="dot" data-conn></span><button class="qbtn" data-help="presidente">?</button><button data-sair>Sair</button></div>
   <div class="body">
     <div class="big" id="pBig">
       <div class="lab">Aguardando ao lado da urna</div>
@@ -118,44 +143,41 @@ input:focus,select:focus{outline:none;border-color:var(--ink)}
     </div>
     <button class="btn" id="btnChamar">Chamar <span id="pLote">5</span></button>
     <div class="row"><button class="btn sec" id="btnMenos">− 1 eleitor atendido</button><button class="btn sec" id="btnMais">+ 1 chegou</button></div>
-    <div class="hint">Toque em "Chamar" quando ficar com 2 ou menos. O pedido vai para a porta do 1º andar.</div>
+    <div class="hint" id="pSecoes"></div><div class="hint">Toque em "Chamar" quando ficar com 2 ou menos. O pedido vai para a porta do 1º andar com o número da mesa e das seções.</div>
   </div>
 </section>
 
 <!-- PORTA -->
 <section id="porta" class="screen">
-  <div class="top" id="topD"><span>Porta 1º andar</span><small id="dSetor"></small><span class="sp"></span><span class="dot" data-conn></span><button data-sair>Sair</button></div>
+  <div class="top" id="topD"><span>Porta 1º andar</span><small id="dSetor"></small><span class="sp"></span><span class="dot" data-conn></span><button class="qbtn" data-help="porta">?</button><button data-sair>Sair</button></div>
   <div class="body">
-    <div class="big" id="dBig" style="flex:0 0 auto;min-height:150px">
+    <div class="big" id="dBig" style="flex:0 0 auto;min-height:120px;padding:12px">
       <div class="lab">Pedidos dos presidentes</div>
-      <div class="num" id="dTotal" style="font-size:clamp(72px,18vh,160px)">0</div>
-      <div class="sub">eleitores a entregar nas mesas</div>
+      <div class="num" id="dTotal" style="font-size:clamp(64px,14vh,120px)">0</div>
+      <div class="sub" id="dResumo"></div>
     </div>
-    <div id="dLista" style="display:flex;flex-direction:column;gap:8px"></div>
-    <div style="flex:1"></div>
-    <div class="hint" id="dCaminho"></div>
-    <div class="row"><button class="btn" id="btnSubir1">Subir <span class="lote1"></span></button><button class="btn" id="btnSubir2">Subir <span class="lote2"></span></button></div>
-    <button class="btn sec" id="btnCancelar" hidden>Cancelar chamada ao térreo</button>
+    <div id="dLista" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div class="hint">Para cada mesa: "Subir N" repassa o pedido ao térreo; "Entreguei" fecha quando os eleitores chegarem à mesa.</div>
   </div>
 </section>
 
 <!-- TERREO -->
 <section id="terreo" class="screen">
-  <div class="top" id="topT"><span>Térreo</span><small id="tSetor"></small><span class="sp"></span><span class="dot" data-conn></span><button data-sair>Sair</button></div>
+  <div class="top" id="topT"><span>Térreo</span><small id="tSetor"></small><span class="sp"></span><span class="dot" data-conn></span><button class="qbtn" data-help="terreo">?</button><button data-sair>Sair</button></div>
   <div class="body">
-    <div class="big" id="tBig">
+    <div class="big" id="tBig" style="flex:0 0 auto;min-height:150px;padding:12px">
       <div class="lab" id="tLab">Segure a fila</div>
-      <div class="num" id="tNum">0</div>
+      <div class="num" id="tNum" style="font-size:clamp(72px,16vh,140px)">0</div>
       <div class="sub" id="tSub">Aguarde o sinal do 1º andar</div>
     </div>
-    <button class="btn" id="btnEnviados" disabled>Enviados, estão subindo</button>
-    <div class="hint" id="tHist"></div>
+    <div id="tLista" style="display:flex;flex-direction:column;gap:10px"></div>
+    <div class="hint">Libere exatamente o número pedido para cada mesa/seção e toque em "Enviados".</div>
   </div>
 </section>
 
 <!-- COORD -->
 <section id="coord" class="screen">
-  <div class="top" id="topC" style="background:var(--ink)"><span>Coordenação</span><span class="sp"></span><span class="dot" data-conn></span><button data-sair>Sair</button></div>
+  <div class="top" id="topC" style="background:var(--ink)"><span>Coordenação</span><span class="sp"></span><span class="dot" data-conn></span><button class="qbtn" data-help="coord">?</button><button data-sair>Sair</button></div>
   <div class="body">
     <div class="coordgrid" id="cGrid"></div>
     <div class="card"><h3>Tamanho do lote</h3>
@@ -170,6 +192,13 @@ input:focus,select:focus{outline:none;border-color:var(--ink)}
     <button class="btn sec" id="btnZerar" style="color:var(--err)">Zerar o dia (apaga pedidos e registro)</button>
   </div>
 </section>
+<div class="help" id="help"><div class="box">
+  <div class="tabs" id="helpTabs">
+    <button data-t="fluxo">Fluxo completo</button><button data-t="presidente">Presidente</button><button data-t="porta">Porta 1º andar</button><button data-t="terreo">Térreo</button><button data-t="coord">Coordenação</button>
+  </div>
+  <div id="helpBody"></div>
+  <button class="close" id="helpClose">Fechar</button>
+</div></div>
 </div>
 
 <script>//---------------------------------------------------------------------
@@ -2476,6 +2505,8 @@ const DB_URL = "https://eleicao-toronto-default-rtdb.firebaseio.com"; // ex.: ht
 const DEFAULTS = {lote:5, pins:{presidente:"1111",porta:"2222",terreo:"3333",coord:"9999"}};
 const MESAS = {roxo:[1,2,3,4,5,6,7,8,9,10], verde:[11,12,13,14,15,16,17,18,19], azul:[20,21,22,23,24,25,26]};
 const NOME = {roxo:"Roxo",verde:"Verde",azul:"Azul"};
+const SECOES = {"1":[1231,1382],"2":[1280,1232],"3":[1363,1212],"4":[1488,1138],"5":[1522,1047],"6":[2892,1046],"7":[2907,958],"8":[2944,917],"9":[2989,868],"10":[3006,734],"11":[3021,629],"12":[3055,575],"13":[3081,441],"14":[3111,440],"15":[3140,439],"16":[3171,438],"17":[3204,437],"18":[3213,436],"19":[3258,435],"20":[3265,3817],"21":[3269,3737],"22":[3273,3689],"23":[3482,3644],"24":[3539,3612],"25":[3904,789],"26":[1031,1443]};
+const secTxt=m=>SECOES[m]?`seções ${SECOES[m][0]} e ${SECOES[m][1]}`:"";
 const COR = {roxo:"var(--roxo)",verde:"var(--verde)",azul:"var(--azul)"};
 const CLARO = {roxo:"var(--roxo-claro)",verde:"var(--verde-claro)",azul:"var(--azul-claro)"};
 
@@ -2484,7 +2515,7 @@ const $=id=>document.getElementById(id);
 const LOCAL = !/^https:\/\//.test(DB_URL);
 let me = JSON.parse(localStorage.getItem('filas.me')||'null'); // {papel, setor, mesa}
 let config = {...DEFAULTS, pins:{...DEFAULTS.pins}};
-let filas = {roxo:{},verde:{},azul:{}}; // {pedidos:{}, subam:0, aCaminho:0, estoque:{mesa:n}}
+let filas = {roxo:{},verde:{},azul:{}}; // por setor: {mesas:{m:{estoque,pedido,chamado,aCaminho}}, ultimoEnvio}
 let logs = {roxo:[],verde:[],azul:[]};
 let connected = false;
 
@@ -2520,19 +2551,21 @@ function merge(obj,path,data){ const parts=path.split('/').filter(Boolean); if(!
   let o=obj; for(let i=0;i<parts.length-1;i++){ o[parts[i]] ??= {}; o=o[parts[i]]; } const k=parts[parts.length-1];
   if(data===null) delete o[k]; else if(typeof data==='object' && typeof o[k]==='object' && o[k]) Object.assign(o[k],data); else o[k]=data; }
 function addLog(setor,who,txt){ dbWrite(`log/${setor}`,{t:hhmm(),ts:Date.now(),who,txt},'POST'); }
-const F=s=>{ filas[s] ??= {}; filas[s].pedidos ??= {}; filas[s].estoque ??= {}; return filas[s]; };
-const total=s=>Object.values(F(s).pedidos||{}).reduce((a,b)=>a+(+b||0),0);
+const F=s=>{ filas[s] ??= {}; filas[s].mesas ??= {}; return filas[s]; };
+const M=(s,m)=>{ const f=F(s); f.mesas[m] ??= {}; const x=f.mesas[m]; return {estoque:+(x.estoque||0),pedido:+(x.pedido||0),chamado:+(x.chamado||0),aCaminho:+(x.aCaminho||0)}; };
+const mesasDo=s=>Object.keys(F(s).mesas).map(Number).sort((a,b)=>a-b);
+const sum=(s,k)=>mesasDo(s).reduce((a,m)=>a+M(s,m)[k],0);
+const total=s=>sum(s,'pedido');
 const logArr=s=>Object.values((logs&&logs[s])||{}).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,60);
 
 /* ======== AÇÕES ======== */
-function chamar(){ const s=me.setor, m=me.mesa, lote=+config.lote||5; const cur=+(F(s).pedidos[m]||0);
-  dbWrite(`filas/${s}/pedidos`,{[m]:cur+lote}); addLog(s,`Presidente mesa ${m}`,`pediu ${lote} à porta`); flash('pBig'); }
-function estoque(delta){ const s=me.setor,m=me.mesa; const v=Math.max(0,Math.min(9,(+(F(s).estoque[m]||0))+delta)); dbWrite(`filas/${s}/estoque`,{[m]:v}); }
-function subir(n){ const s=me.setor; dbWrite(`filas/${s}`,{subam:n}); addLog(s,'Porta 1º andar',`pediu ${n} ao térreo`); }
-function cancelar(){ const s=me.setor; dbWrite(`filas/${s}`,{subam:0}); addLog(s,'Porta 1º andar','cancelou a chamada'); }
-function enviados(){ const s=me.setor; const n=+(F(s).subam||0); dbWrite(`filas/${s}`,{subam:0,aCaminho:(+(F(s).aCaminho||0))+n,ultimoEnvio:hhmm()}); addLog(s,'Fila térreo',`liberou ${n}, estão subindo`); flash('tBig'); }
-function entreguei(m){ const s=me.setor; const n=+(F(s).pedidos[m]||0); const est=Math.min(9,(+(F(s).estoque[m]||0))+n);
-  dbWrite(`filas/${s}/pedidos/${m}`,null,'DELETE'); dbWrite(`filas/${s}`,{aCaminho:Math.max(0,(+(F(s).aCaminho||0))-n)}); dbWrite(`filas/${s}/estoque`,{[m]:est}); addLog(s,'Porta 1º andar',`entregou ${n} na mesa ${m}`); }
+function chamar(){ const s=me.setor, m=me.mesa, lote=+config.lote||5; const x=M(s,m);
+  dbWrite(`filas/${s}/mesas/${m}`,{pedido:x.pedido+lote}); addLog(s,`Presidente mesa ${m}`,`pediu ${lote} à porta (${secTxt(m)})`); flash('pBig'); }
+function estoque(delta){ const s=me.setor,m=me.mesa; const v=Math.max(0,Math.min(9,M(s,m).estoque+delta)); dbWrite(`filas/${s}/mesas/${m}`,{estoque:v}); }
+function subir(m,n){ const s=me.setor; const x=M(s,m); dbWrite(`filas/${s}/mesas/${m}`,{chamado:x.chamado+n,pedido:Math.max(0,x.pedido-n)}); addLog(s,'Porta 1º andar',`pediu ${n} ao térreo para a mesa ${m} (${secTxt(m)})`); }
+function cancelar(m){ const s=me.setor; const x=M(s,m); dbWrite(`filas/${s}/mesas/${m}`,{chamado:0,pedido:x.pedido+x.chamado}); addLog(s,'Porta 1º andar',`cancelou a chamada da mesa ${m}`); }
+function enviados(m){ const s=me.setor; const x=M(s,m); dbWrite(`filas/${s}/mesas/${m}`,{chamado:0,aCaminho:x.aCaminho+x.chamado}); dbWrite(`filas/${s}`,{ultimoEnvio:hhmm()}); addLog(s,'Fila térreo',`liberou ${x.chamado} para a mesa ${m} (${secTxt(m)})`); flash('tBig'); }
+function entreguei(m){ const s=me.setor; const x=M(s,m); dbWrite(`filas/${s}/mesas/${m}`,{aCaminho:0,estoque:Math.min(9,x.estoque+x.aCaminho)}); addLog(s,'Porta 1º andar',`entregou ${x.aCaminho} na mesa ${m}`); }
 function flash(id){ const e=$(id); e.classList.remove('flash'); void e.offsetWidth; e.classList.add('flash'); }
 
 /* ======== TELAS ======== */
@@ -2540,23 +2573,26 @@ function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.t
 function render(){
   if(!me){ show('setup'); return; }
   const s=me.setor, c=COR[s], cl=CLARO[s], lote=+config.lote||5;
-  if(me.papel==='presidente'){ show('presidente'); const f=F(s), m=me.mesa; $('topP').style.background=c; $('pMesa').textContent=m; $('pSetor').textContent='Setor '+NOME[s];
-    const est=+(f.estoque[m]||0); $('pEstoque').textContent=est; $('pBig').style.background=cl; $('pBig').style.color=c;
-    $('pBoxes').innerHTML=Array.from({length:Math.max(5,lote)},(_,i)=>`<i class="${i<est?'on':''}"></i>`).join('');
-    const pend=+(f.pedidos[m]||0); $('pPend').textContent=pend?`Pedido em aberto: ${pend} a caminho`:'Nenhum pedido em aberto'; $('pLote').textContent=lote; $('btnChamar').style.background=c; $('btnMenos').disabled=est===0; }
-  else if(me.papel==='porta'){ show('porta'); const f=F(s); $('topD').style.background=c; $('dSetor').textContent='Setor '+NOME[s]; $('dBig').style.background=cl; $('dBig').style.color=c;
-    $('dTotal').textContent=total(s);
-    const ms=Object.keys(f.pedidos).filter(m=>+f.pedidos[m]>0).sort((a,b)=>a-b);
-    $('dLista').innerHTML=ms.map(m=>`<div class="pedido"><span>Mesa <b>${m}</b> pediu <b>${f.pedidos[m]}</b></span><button style="background:${c}" data-m="${m}">Entreguei</button></div>`).join('')||`<div class="hint">Nenhuma mesa pedindo agora</div>`;
-    $('dCaminho').textContent=(+f.aCaminho>0)?`${f.aCaminho} subindo a escada agora`:(f.subam>0?`Térreo avisado: liberar ${f.subam}`:'Ninguém a caminho');
-    document.querySelector('.lote1').textContent=lote; document.querySelector('.lote2').textContent=lote*2;
-    $('btnSubir1').style.background=$('btnSubir2').style.background=c; $('btnSubir1').disabled=$('btnSubir2').disabled=(+f.subam>0); $('btnCancelar').hidden=!(+f.subam>0); }
-  else if(me.papel==='terreo'){ show('terreo'); const f=F(s); $('topT').style.background=c; $('tSetor').textContent='Fila '+NOME[s]; const n=+(f.subam||0); const big=$('tBig');
-    if(n>0){ big.style.background=c; big.style.color='#fff'; $('tLab').textContent='Podem subir'; $('tNum').textContent=n; $('tSub').textContent=`Libere ${n} da fila ${NOME[s].toLowerCase()} e toque em Enviados`; }
+  if(me.papel==='presidente'){ show('presidente'); const m=me.mesa, x=M(s,m); $('topP').style.background=c; $('pMesa').textContent=m; $('pSetor').textContent='Setor '+NOME[s]; $('pSecoes').textContent=secTxt(m).replace('seções','Seções');
+    $('pEstoque').textContent=x.estoque; $('pBig').style.background=cl; $('pBig').style.color=c;
+    $('pBoxes').innerHTML=Array.from({length:Math.max(5,lote)},(_,i)=>`<i class="${i<x.estoque?'on':''}"></i>`).join('');
+    const parts=[]; if(x.pedido) parts.push(`${x.pedido} pedidos à porta`); if(x.chamado) parts.push(`${x.chamado} chamados no térreo`); if(x.aCaminho) parts.push(`${x.aCaminho} subindo`);
+    $('pPend').textContent=parts.length?parts.join(' · '):'Nenhum pedido em aberto'; $('pLote').textContent=lote; $('btnChamar').style.background=c; $('btnMenos').disabled=x.estoque===0; }
+  else if(me.papel==='porta'){ show('porta'); $('topD').style.background=c; $('dSetor').textContent='Setor '+NOME[s]; $('dBig').style.background=cl; $('dBig').style.color=c;
+    $('dTotal').textContent=total(s); $('dResumo').textContent=`${sum(s,'chamado')} chamados no térreo · ${sum(s,'aCaminho')} subindo`;
+    const ms=mesasDo(s).filter(m=>{const x=M(s,m);return x.pedido||x.chamado||x.aCaminho;});
+    $('dLista').innerHTML=ms.map(m=>{ const x=M(s,m); return `<div class="item"><div class="hd"><span>Mesa <b>${m}</b></span><span class="sec">${secTxt(m)}</span></div>
+      <div class="st"><span>pediu <b>${x.pedido}</b></span><span>térreo <b>${x.chamado}</b></span><span>subindo <b>${x.aCaminho}</b></span></div>
+      <div class="acts">${x.chamado>0?`<button class="ghost" data-act="cancelar" data-m="${m}">Cancelar</button>`:`<button style="background:${c}" data-act="subir" data-n="${lote}" data-m="${m}" ${x.pedido?'':'disabled'}>Subir ${lote}</button><button style="background:${c}" data-act="subir" data-n="${lote*2}" data-m="${m}" ${x.pedido?'':'disabled'}>Subir ${lote*2}</button>`}
+      <button class="ghost" data-act="entreguei" data-m="${m}" ${x.aCaminho?'':'disabled'}>Entreguei</button></div></div>`; }).join('')||`<div class="hint">Nenhuma mesa pedindo agora</div>`; }
+  else if(me.papel==='terreo'){ show('terreo'); $('topT').style.background=c; $('tSetor').textContent='Fila '+NOME[s]; const n=sum(s,'chamado'); const big=$('tBig');
+    if(n>0){ big.style.background=c; big.style.color='#fff'; $('tLab').textContent='Podem subir'; $('tNum').textContent=n; $('tSub').textContent='no total — veja a lista por mesa abaixo'; }
     else { big.style.background=cl; big.style.color=c; $('tLab').textContent='Segure a fila'; $('tNum').textContent='0'; $('tSub').textContent='Aguarde o sinal do 1º andar'; }
-    $('btnEnviados').style.background=c; $('btnEnviados').disabled=n===0; $('tHist').textContent=f.ultimoEnvio?`Último envio às ${f.ultimoEnvio}`:''; }
+    const ms=mesasDo(s).filter(m=>M(s,m).chamado>0);
+    $('tLista').innerHTML=ms.map(m=>{ const x=M(s,m); return `<div class="item alert"><div class="hd"><span>Mesa <b>${m}</b></span><span class="sec">${secTxt(m)}</span></div>
+      <div class="st"><span>subir <b>${x.chamado}</b></span></div><div class="acts"><button style="background:${c}" data-act="enviados" data-m="${m}">Enviados (${x.chamado})</button></div></div>`; }).join('')||`<div class="hint">${F(s).ultimoEnvio?'Último envio às '+F(s).ultimoEnvio:''}</div>`; }
   else if(me.papel==='coord'){ show('coord');
-    $('cGrid').innerHTML=['roxo','verde','azul'].map(k=>{ const f=F(k); return `<div style="background:${COR[k]}"><span>Setor ${NOME[k]}</span><b>${total(k)}</b><span>pedidos em aberto</span><div class="st">${+f.subam>0?`térreo: subir ${f.subam}`:(+f.aCaminho>0?`${f.aCaminho} subindo`:'parado')}</div></div>`; }).join('');
+    $('cGrid').innerHTML=['roxo','verde','azul'].map(k=>`<div style="background:${COR[k]}"><span>Setor ${NOME[k]}</span><b>${total(k)}</b><span>pedidos em aberto</span><div class="st">térreo: ${sum(k,'chamado')} · subindo: ${sum(k,'aCaminho')}</div></div>`).join('');
     document.querySelectorAll('[data-lote]').forEach(b=>{ const on=+b.dataset.lote===lote; b.style.background=on?'var(--ink)':''; b.style.color=on?'var(--bg)':''; b.style.borderColor=on?'var(--ink)':''; });
     document.querySelectorAll('[data-pin]').forEach(i=>{ if(document.activeElement!==i) i.value=config.pins[i.dataset.pin]||''; });
     const all=['roxo','verde','azul'].flatMap(k=>logArr(k).map(l=>({...l,k}))).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,80);
@@ -2578,12 +2614,65 @@ document.querySelectorAll('[data-sair]').forEach(b=>b.onclick=()=>{ me=null; loc
 
 /* ======== BOTÕES ======== */
 $('btnChamar').onclick=chamar; $('btnMenos').onclick=()=>estoque(-1); $('btnMais').onclick=()=>estoque(1);
-$('btnSubir1').onclick=()=>subir(+config.lote||5); $('btnSubir2').onclick=()=>subir((+config.lote||5)*2); $('btnCancelar').onclick=cancelar;
-$('dLista').addEventListener('click',e=>{ const b=e.target.closest('button[data-m]'); if(b) entreguei(b.dataset.m); });
-$('btnEnviados').onclick=enviados;
+$('dLista').addEventListener('click',e=>{ const b=e.target.closest('button[data-act]'); if(!b||b.disabled) return; const m=+b.dataset.m; ({subir:()=>subir(m,+b.dataset.n),cancelar:()=>cancelar(m),entreguei:()=>entreguei(m)})[b.dataset.act](); });
+$('tLista').addEventListener('click',e=>{ const b=e.target.closest('button[data-act="enviados"]'); if(b) enviados(+b.dataset.m); });
 document.querySelectorAll('[data-lote]').forEach(b=>b.onclick=()=>{ dbWrite('config',{lote:+b.dataset.lote}); addLog('verde','Coordenação',`lote definido em ${b.dataset.lote}`); });
 $('btnSalvarPins').onclick=()=>{ const pins={}; document.querySelectorAll('[data-pin]').forEach(i=>pins[i.dataset.pin]=i.value.trim()||config.pins[i.dataset.pin]); dbWrite('config',{pins}); };
 $('btnZerar').onclick=()=>{ if(!confirm('Apagar todos os pedidos e o registro do dia?')) return; dbWrite('filas',{roxo:{},verde:{},azul:{}},'PUT'); dbWrite('log',{},'PUT'); };
+
+/* ======== AJUDA ======== */
+const HELP={
+fluxo:`<h2>Como funciona o processo</h2>
+<p>O objetivo é que nenhuma urna fique parada e que o 1º andar não lote. Ninguém "empurra" eleitores escada acima: quem tem espaço é que pede. O pedido sempre vai identificado pela <b>mesa e pelas suas duas seções</b>.</p>
+<ol>
+<li><b>Presidente da mesa</b> vê que sobraram 2 ou menos eleitores ao lado da urna e toca em <b>Chamar</b>. O pedido (por exemplo, 5 para a Mesa 4, seções 1488 e 1138) aparece na porta do 1º andar.</li>
+<li><b>Porta do 1º andar</b> recebe os pedidos de várias mesas do seu setor. Para cada mesa decide quanto chamar do térreo: o lote (5) ou o dobro (10), e toca em <b>Subir</b>. A decisão é sempre por mesa/seção.</li>
+<li><b>Fila do térreo</b> recebe a lista de mesas chamadas, com o número exato de cada uma. Libera da fila da sua cor <b>exatamente</b> esse número, anunciando a mesa e as seções, e toca em <b>Enviados</b>. O térreo não pode aumentar o número.</li>
+<li>Os eleitores sobem a escada. A <b>porta do 1º andar</b> vê quantos estão "subindo" para cada mesa, encaminha-os e toca em <b>Entreguei</b>. O presidente vê a fila ao lado da urna crescer de novo.</li>
+</ol>
+<p>Cada setor (roxo, verde, azul) tem seu próprio circuito; o que acontece em um não aparece nos outros. A <b>coordenação</b> enxerga os três, define o tamanho do lote e os PINs, e tem o registro de tudo com horário.</p>
+<p><b>Regra de ouro:</b> toque no botão na hora em que a coisa acontece, nem antes nem depois. É o que mantém os números certos nos outros celulares.</p>`,
+presidente:`<h2>Presidente da mesa</h2>
+<p><b>Seu papel:</b> garantir que a urna nunca fique sem eleitor, pedindo gente com antecedência, enquanto ainda há 2 ou 3 esperando ao lado.</p>
+<h3>O que você vê</h3>
+<ul><li>Número grande: quantos eleitores estão aguardando ao lado da sua urna.</li><li>Abaixo, o que já foi pedido e ainda não chegou ("pedidos à porta", "chamados no térreo", "subindo").</li></ul>
+<h3>O que você faz</h3>
+<ul><li><b>Chamar N</b>: pede N eleitores à porta do 1º andar, identificados pela sua mesa e seções. Toque quando ficar com 2 ou menos. Pode tocar de novo se precisar de mais.</li>
+<li><b>− 1 eleitor atendido</b>: toque cada vez que um eleitor sai da urna, para o número ficar certo.</li>
+<li><b>+ 1 chegou</b>: se alguém chegar por fora do processo, corrija o número.</li></ul>
+<p>Você não fala com o térreo; a porta do 1º andar faz isso por você.</p>`,
+porta:`<h2>Porta do 1º andar</h2>
+<p><b>Seu papel:</b> ser o elo entre as mesas do seu setor e a fila do térreo. Você recebe os pedidos de várias mesas e decide, mesa por mesa, quanto chamar.</p>
+<h3>O que você vê</h3>
+<ul><li>Total de eleitores pedidos pelos presidentes do seu setor.</li><li>Uma linha por mesa com as suas seções e três números: <b>pediu</b> (o presidente quer), <b>térreo</b> (você já chamou e o térreo ainda não liberou), <b>subindo</b> (o térreo liberou e estão na escada).</li></ul>
+<h3>O que você faz</h3>
+<ul><li><b>Subir N</b> ou <b>Subir 2N</b>: chama do térreo para aquela mesa. Use o dobro quando a mesa estiver muito vazia ou houver mais de um pedido acumulado.</li>
+<li><b>Cancelar</b>: desfaz uma chamada que o térreo ainda não atendeu (o pedido volta para "pediu").</li>
+<li><b>Entreguei</b>: quando os eleitores daquela mesa chegarem e você os encaminhar, toque para fechar. O presidente vê a fila dele atualizada.</li></ul>
+<p>Mantenha o patamar livre: só chame do térreo o que as mesas conseguem absorver.</p>`,
+terreo:`<h2>Fila no térreo</h2>
+<p><b>Seu papel:</b> segurar a fila da sua cor e liberar apenas quem o 1º andar pediu, na quantidade exata e para a mesa certa.</p>
+<h3>O que você vê</h3>
+<ul><li>Tela colorida com o total que pode subir agora.</li><li>Uma linha por mesa chamada, com as seções e o número a liberar.</li></ul>
+<h3>O que você faz</h3>
+<ul><li>Anuncie em voz alta: "Mesa 4, seções 1488 e 1138: cinco pessoas". Deixe passar exatamente esse número.</li>
+<li>Toque em <b>Enviados</b> daquela mesa assim que os eleitores entrarem na escada. A linha some e o 1º andar fica sabendo que estão subindo.</li></ul>
+<p>Você <b>não pode</b> aumentar nem diminuir o número: só o 1º andar decide quantos sobem. Se a tela estiver cinza ("Segure a fila"), ninguém sobe.</p>`,
+coord:`<h2>Coordenação</h2>
+<p><b>Seu papel:</b> preparar o sistema antes de abrir e acompanhar os três setores durante o dia.</p>
+<h3>Antes de começar</h3>
+<ul><li>Defina o <b>tamanho do lote</b> (3, 4, 5 ou 6). Vale para todos os aparelhos na hora.</li><li>Troque os <b>PINs</b> dos quatro papéis e informe cada equipe só o seu.</li><li>Distribua o app pelo <b>QR Code</b>: cada pessoa aponta a câmera, abre o link e adiciona à tela de início.</li></ul>
+<h3>Durante o dia</h3>
+<ul><li>Os três cartões mostram, por setor, pedidos em aberto, chamados no térreo e subindo. Um número que só cresce indica um setor travado.</li><li>O <b>registro</b> mostra cada toque com horário, útil para entender um problema.</li></ul>
+<h3>Cuidado</h3>
+<p><b>Zerar o dia</b> apaga todos os pedidos e o registro em todos os aparelhos. Use só antes de abrir ou em caso de bagunça geral.</p>`};
+let helpTab='fluxo';
+function openHelp(t){ helpTab=t; $('help').classList.add('on'); renderHelp(); }
+function renderHelp(){ $('helpBody').innerHTML=HELP[helpTab]; document.querySelectorAll('#helpTabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===helpTab)); $('helpBody').scrollTop=0; }
+document.querySelectorAll('[data-help]').forEach(b=>b.onclick=()=>openHelp(b.dataset.help));
+document.querySelectorAll('#helpTabs button').forEach(b=>b.onclick=()=>{ helpTab=b.dataset.t; renderHelp(); });
+$('helpClose').onclick=()=>$('help').classList.remove('on');
+$('help').addEventListener('click',e=>{ if(e.target===$('help')) $('help').classList.remove('on'); });
 
 /* ======== INÍCIO ======== */
 listen(); render();
